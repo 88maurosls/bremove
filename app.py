@@ -11,7 +11,7 @@ def remove_background(image):
     # Converti l'immagine da RGB a scala di grigi
     gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
 
-    # Applica una sogliatura per ottenere un'immagine binaria
+    # Applica la sogliatura per ottenere un'immagine binaria
     _, thresh = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY)
 
     # Trova i contorni nell'immagine binaria

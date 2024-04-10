@@ -1,6 +1,3 @@
-streamlit
+rembg
 pillow
-numpy
-torch==1.12.1
-torchvision==0.13.1
-git+https://github.com/NathanUA/U-2-Net.git
+streamlit

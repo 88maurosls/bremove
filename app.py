@@ -1,55 +1,51 @@
 import streamlit as st
-import cv2
-import numpy as np
 from PIL import Image
+import numpy as np
 import io
+from u2net import detect
 
-def remove_background(image):
-    # Converti l'immagine PIL in un array NumPy
-    img_array = np.array(image)
+def process_image(input_image):
+    """Process the input image to remove the background using U^2-Net."""
+    # Convert PIL Image to numpy array
+    input_array = np.array(input_image.convert('RGB'))
+    
+    # Detect the foreground mask
+    result = detect(input_array)
+    mask = (result > 0.5).astype(np.uint8) * 255  # Threshold adjusted here
 
-    # Converti l'immagine da RGB a scala di grigi
-    gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
+    # Create a PIL Image from the numpy array
+    mask_image = Image.fromarray(mask)
 
-    # Applica la sogliatura per ottenere un'immagine binaria
-    _, thresh = cv2.threshold(gray, 240, 255, cv2.THRESH_BINARY)
+    # Prepare output image (composite the input with the mask)
+    background = Image.new("RGB", input_image.size, (255, 255, 255))
+    background.paste(input_image, mask=mask_image)
+    return background
 
-    # Trova i contorni nell'immagine binaria
-    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    # Crea una maschera per i contorni trovati
-    mask = np.zeros_like(gray)
-    cv2.drawContours(mask, contours, -1, (255, 255, 255), thickness=cv2.FILLED)
-
-    # Applica la maschera all'immagine originale per rimuovere lo sfondo
-    result = cv2.bitwise_and(img_array, img_array, mask=mask)
-
-    # Converti l'array NumPy risultante in un'immagine PIL
-    result_image = Image.fromarray(result)
-
-    return result_image
-
-# Streamlit app
 def main():
-    st.title("Background Fashion Removal")
+    st.title("Background Removal with U^2-Net")
 
-    uploaded_file = st.file_uploader("Upload an image", type=["jpg", "png", "jpeg"])
+    # File uploader allows user to add their own image
+    uploaded_file = st.file_uploader("Upload an image", type=['jpg', 'png', 'jpeg'])
 
     if uploaded_file is not None:
-        input_image = Image.open(uploaded_file)
+        input_image = Image.open(uploaded_file).convert('RGB')
 
         # Process image
-        output_image = remove_background(input_image)
+        output_image = process_image(input_image)
 
         # Display processed image
         st.image(output_image, caption='Processed Image', use_column_width=True)
 
-        # Converti l'immagine in dati binari
-        output_buffer = io.BytesIO()
-        output_image.save(output_buffer, format='PNG')
+        # Save the processed image to a buffer
+        buf = io.BytesIO()
+        output_image.save(buf, format='PNG')
+        byte_im = buf.getvalue()
 
         # Button to download the processed image
-        st.download_button(label='Download', data=output_buffer.getvalue(), file_name='output.png')
+        st.download_button(label="Download Processed Image",
+                           data=byte_im,
+                           file_name='processed_image.png',
+                           mime='image/png')
 
 if __name__ == "__main__":
     main()

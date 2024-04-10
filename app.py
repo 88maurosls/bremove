@@ -8,7 +8,7 @@ def process_image(input_image):
 
 # Streamlit app
 def main():
-    st.title("Frenz's Background Fashion Removal")
+    st.title("Background Fashion Removal")
 
     uploaded_file = st.file_uploader("Upload an image", type=["jpg", "png", "jpeg"])
 

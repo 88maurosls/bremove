@@ -2,6 +2,7 @@ import streamlit as st
 import cv2
 import numpy as np
 from PIL import Image
+import io
 
 def remove_background(image):
     # Converti l'immagine PIL in un array NumPy
@@ -43,8 +44,12 @@ def main():
         # Display processed image
         st.image(output_image, caption='Processed Image', use_column_width=True)
 
+        # Converti l'immagine in dati binari
+        output_buffer = io.BytesIO()
+        output_image.save(output_buffer, format='PNG')
+
         # Button to download the processed image
-        st.download_button(label='Download', data=output_image, file_name='output.png')
+        st.download_button(label='Download', data=output_buffer.getvalue(), file_name='output.png')
 
 if __name__ == "__main__":
     main()

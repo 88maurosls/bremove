@@ -1,3 +1,4 @@
 rembg
-pillow
+onnxruntime==1.10.0
+Pillow
 streamlit
